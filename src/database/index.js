@@ -10,13 +10,19 @@ const models = [User, File, Meetup];
 
 class Database {
   constructor() {
+    this.connection = new Sequelize(databaseConfig);
+
     this.init();
   }
 
   init() {
-    this.connection = new Sequelize(databaseConfig);
+    models.forEach(model => {
+      model.init(this.connection);
 
-    models.map(model => model.init(this.connection));
+      if (model.associate) {
+        model.associate(this.connection.models);
+      }
+    });
   }
 }
 
