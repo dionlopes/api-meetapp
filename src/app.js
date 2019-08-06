@@ -3,9 +3,13 @@ import 'dotenv/config';
 import express from 'express';
 import 'express-async-errors';
 
+import path from 'path';
+
 import Youch from 'youch';
 
-import path from 'path';
+import * as Sentry from '@sentry/node';
+import sentryConfig from './config/sentry';
+
 import routes from './routes';
 
 import './database';
@@ -14,9 +18,12 @@ class App {
   constructor() {
     this.server = express();
 
+    Sentry.init(sentryConfig);
+
+    this.server.use(Sentry.Handlers.requestHandler());
     this.middlewares();
     this.routes();
-
+    this.server.use(Sentry.Handlers.errorHandler());
     this.exceptionHandler();
   }
 
