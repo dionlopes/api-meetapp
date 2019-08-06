@@ -4,6 +4,7 @@
 
 <p align="center">
   <a href="#rocket-technologies">Technologies</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+  <a href="#information_source-how-to-use">How To Use</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
 	<a href="#memo-license">License</a>
 </p>
 
@@ -32,6 +33,36 @@ This project was developed at the [RocketSeat GoStack Bootcamp](https://rocketse
 -  [Express Async Errors](https://github.com/davidbanham/express-async-errors)
 -  [DotEnv](https://www.npmjs.com/package/dotenv)
 -  [VS Code][vc] with [ESLint][vceslint]
+
+## :information_source: How To Use
+
+To clone and run this application, you'll need [Git](https://git-scm.com), [Node.js v10.16][nodejs] or higher + [Yarn v1.13][yarn] or higher installed on your computer. From your command line:
+
+```bash
+# Clone this repository
+$ git clone https://github.com/dionlopes/api-meetapp
+
+# Go into the repository
+$ cd api-meetapp
+
+# Copy environment
+$ cp .env.example .env
+
+# Configure environment
+Open .env and configure Database, Redis, Mail, Sentry
+
+# Install dependencies
+$ yarn
+
+# Run database migrations
+$ yarn sequelize db:migrate
+
+# Run the app
+$ yarn dev
+
+# Run the queue
+$ yarn queue
+```
 
 ## :memo: License
 This project is under the MIT license. See the [LICENSE](https://github.com/dionlopes/api-meetapp/blob/master/LICENSE) for more information.
