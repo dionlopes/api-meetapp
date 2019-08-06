@@ -5,7 +5,7 @@ class File extends Model {
     super.init(
       {
         path: Sequelize.STRING,
-        name: sequelize.STRING,
+        name: Sequelize.STRING,
         url: {
           type: Sequelize.VIRTUAL,
           get() {
