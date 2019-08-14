@@ -1,9 +1,18 @@
-import { isBefore, parseISO, startOfDay, endOfDay } from 'date-fns';
+import {
+  isBefore,
+  parseISO,
+  startOfDay,
+  endOfDay,
+  format,
+  startOfHour,
+} from 'date-fns';
+
 import * as Yup from 'yup';
 import { Op } from 'sequelize';
 
 import Meetup from '../models/Meetup';
 import User from '../models/User';
+import File from '../models/File';
 
 class MeetupController {
   async index(req, res) {
@@ -20,10 +29,17 @@ class MeetupController {
 
     const meetups = await Meetup.findAll({
       where,
+      attributes: ['id', 'title', 'description', 'location', 'date'],
       include: [
         {
           model: User,
+          as: 'user',
           attributes: ['id', 'name', 'email'],
+        },
+        {
+          model: File,
+          as: 'imagem',
+          attributes: ['id', 'url', 'name', 'path'],
         },
       ],
       limit: 10,
@@ -39,18 +55,22 @@ class MeetupController {
       file_id: Yup.number().required(),
       description: Yup.string().required(),
       location: Yup.string().required(),
-      date: Yup.date().required(),
+      date: Yup.number().required(),
     });
 
     if (!(await schema.isValid(req.body))) {
       return res.status(400).json({ error: 'Validation fails' });
     }
 
-    if (isBefore(parseISO(req.body.date), new Date())) {
+    const { title, description, location, date, file_id } = req.body;
+
+    const hourStart = startOfHour(date);
+
+    if (isBefore(hourStart, new Date())) {
       return res.status(400).json({ error: 'Meet date invalid' });
     }
 
-    const { title, description, location, date, file_id } = req.body;
+    const formatedDate = format(date, "yyyy-MM-dd'T'HH:mm:ssxxx");
 
     const user_id = req.userId;
 
@@ -58,7 +78,7 @@ class MeetupController {
       title,
       description,
       location,
-      date,
+      date: formatedDate,
       file_id,
       user_id,
     });
@@ -72,7 +92,7 @@ class MeetupController {
       file_id: Yup.number().required(),
       description: Yup.string().required(),
       location: Yup.string().required(),
-      date: Yup.date().required(),
+      date: Yup.number().required(),
     });
 
     if (!(await schema.isValid(req.body))) {
@@ -91,15 +111,28 @@ class MeetupController {
       return res.status(401).json({ error: 'Not authorized' });
     }
 
-    if (isBefore(parseISO(req.body.date), new Date())) {
-      return res.status(400).json({ error: 'Meetup date invalid' });
-    }
-
     if (meetup.past) {
       return res.status(400).json({ error: "Can't update past meetups" });
     }
 
-    await meetup.update(req.body);
+    const { title, description, location, date, file_id } = req.body;
+
+    const hourStart = startOfHour(date);
+
+    if (isBefore(hourStart, new Date())) {
+      return res.status(400).json({ error: 'Meet date invalid' });
+    }
+
+    const formatedDate = format(date, "yyyy-MM-dd'T'HH:mm:ssxxx");
+
+    await meetup.update({
+      title,
+      description,
+      location,
+      date: formatedDate,
+      file_id,
+      user_id,
+    });
 
     return res.json(meetup);
   }
@@ -115,10 +148,6 @@ class MeetupController {
 
     if (meetup.user_id !== user_id) {
       return res.status(401).json({ error: 'Not authorized' });
-    }
-
-    if (meetup.past) {
-      return res.status(400).json({ error: "Can't update past meetups" });
     }
 
     await meetup.destroy();
